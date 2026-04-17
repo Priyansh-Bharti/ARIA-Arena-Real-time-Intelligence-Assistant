@@ -1,0 +1,12 @@
+{
+  "name": "aria-stadium-assistant",
+  "version": "1.0.0",
+  "description": "Production server for ARIA PWA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
