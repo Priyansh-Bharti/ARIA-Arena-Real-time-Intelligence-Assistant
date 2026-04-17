@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARIA — Offline</title>
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body class="app-shell" style="align-items: center; justify-content: center; text-align: center; padding: var(--spacing-xxl);">
+  <main>
+    <div style="font-size: 4rem; margin-bottom: var(--spacing-lg);" aria-hidden="true">🏟️</div>
+    <h1 class="display-sm" style="color: var(--color-error); margin-bottom: var(--spacing-sm);">Are you still in the stands?</h1>
+    <p style="color: var(--color-on-surface-variant); margin-bottom: var(--spacing-xl);">We've lost connection to the arena's intelligence feed. Please check your stadium Wi-Fi or cellular data.</p>
+    <div class="card" style="width: 100%; max-width: 400px; margin: 0 auto;">
+      <p style="font-weight: 600; margin-bottom: var(--spacing-lg);">While you're offline:</p>
+      <ul style="text-align: left; color: var(--color-on-surface-variant); padding-left: var(--spacing-md); line-height: 2;">
+        <li>Follow the crowd for major exits</li>
+        <li>Use physical signage for restrooms</li>
+        <li>Your last cached route is still available</li>
+      </ul>
+      <button onclick="window.location.reload()" class="btn btn-primary" style="width: 100%; margin-top: var(--spacing-xl);">RETRY CONNECTION</button>
+    </div>
+  </main>
+</body>
+</html>
