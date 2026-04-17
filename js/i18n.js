@@ -1,0 +1,100 @@
+/**
+ * ARIA — Internationalization Module
+ * Manages runtime locale switching and string translations.
+ * Supports: English (en), Hindi (hi), Spanish (es), French (fr).
+ * @module i18n
+ */
+
+export const i18n = {
+  /**
+   * Retrieves current language from <html> lang attribute.
+   * @returns {string} locale code
+   */
+  get currentLang() { return document.documentElement.lang || 'en'; },
+
+  /**
+   * Updates page language and text direction attributes.
+   * @param {string} lang - locale code (e.g., 'hi')
+   */
+  set currentLang(lang) {
+    document.documentElement.lang = lang;
+    // Support for RTL languages (planned for V2 expansion)
+    document.documentElement.dir = (lang === 'ar' || lang === 'ur') ? 'rtl' : 'ltr';
+  },
+
+  /* ── Translation Registry ──────────────────────────────────────── */
+
+  translations: {
+    en: {
+      welcome_title: "Welcome to the Arena",
+      welcome_subtitle: "Register your location for personalized intelligence.",
+      section: "SECTION", row: "ROW", seat: "SEAT",
+      enter_arena: "ENTER ARENA",
+      assistant_title: "SEC", location_label: "YOUR LOCATION",
+      pro_tip_label: "PRO TIP", aria_intelligence: "ARIA INTELLIGENCE",
+      view_map: "VIEW FULL MAP", view_route: "VIEW ROUTE ON MAP",
+      dismiss: "DISMISS", back: "BACK",
+      food_drinks: "Food & Drinks", restrooms: "Restrooms",
+      exit_route: "Exit Route", emergency: "Emergency",
+      wayfinding: "WAYFINDING",
+      offline_title: "Are you still in the stands?",
+      offline_body: "We've lost connection to the arena's intelligence feed.",
+      retry: "RETRY CONNECTION"
+    },
+    hi: {
+      welcome_title: "अखाड़े में आपका स्वागत है",
+      welcome_subtitle: "व्यक्तिगत बुद्धिमत्ता के लिए अपना स्थान पंजीकृत करें।",
+      section: "अनुभाग", row: "पंक्ति", seat: "सीट",
+      enter_arena: "अखाड़े में प्रवेश करें",
+      assistant_title: "अनुभाग", location_label: "आपका स्थान",
+      pro_tip_label: "प्रो टिप", aria_intelligence: "आरिया इंटेलिजेंस",
+      view_map: "पूरा नक्शा देखें", view_route: "नक्शे पर मार्ग देखें",
+      dismiss: "खारिज करें", back: "पीछे",
+      food_drinks: "खाना और पीना", restrooms: "शौचालय",
+      exit_route: "निकास मार्ग", emergency: "आपातकालीन",
+      wayfinding: "मार्ग खोजना",
+      offline_title: "क्या आप अभी भी स्टैंड में हैं?",
+      offline_body: "हमने अखाड़े की इंटेलिजेंस फीड से कनेक्शन खो दिया है।",
+      retry: "कनेक्शन पुनः प्रयास करें"
+    },
+    es: {
+      welcome_title: "Bienvenido a la Arena",
+      welcome_subtitle: "Registra tu ubicación para inteligencia personalizada.",
+      section: "SECCIÓN", row: "FILA", seat: "ASIENTO",
+      enter_arena: "ENTRAR A LA ARENA",
+      assistant_title: "SEC", location_label: "TU UBICACIÓN",
+      pro_tip_label: "CONSEJO PRO", aria_intelligence: "INTELIGENCIA ARIA",
+      view_map: "VER MAPA COMPLETO", view_route: "VER RUTA EN MAPA",
+      dismiss: "DESCARTAR", back: "VOLVER",
+      food_drinks: "Comida y Bebida", restrooms: "Baños",
+      exit_route: "Ruta de Salida", emergency: "Emergencia",
+      wayfinding: "SEÑALIZACIÓN",
+      offline_title: "¿Sigues en las gradas?",
+      offline_body: "Hemos perdido la conexión con el canal de inteligencia.",
+      retry: "REINTENTAR CONEXIÓN"
+    },
+    fr: {
+      welcome_title: "Bienvenue à l'Aréna",
+      welcome_subtitle: "Enregistrez votre position pour une intelligence personnalisée.",
+      section: "SECTION", row: "RANGÉE", seat: "SIÈGE",
+      enter_arena: "ENTRER DANS L'ARÉNA",
+      assistant_title: "SEC", location_label: "VOTRE POSITION",
+      pro_tip_label: "CONSEIL PRO", aria_intelligence: "INTELLIGENCE ARIA",
+      view_map: "VOIR LA CARTE COMPLÈTE", view_route: "VOIR L'ITINÉRAIRE",
+      dismiss: "IGNORER", back: "RETOUR",
+      food_drinks: "Nourriture & Boissons", restrooms: "Toilettes",
+      exit_route: "Itinéraire de Sortie", emergency: "Urgence",
+      wayfinding: "ORIENTATION",
+      offline_title: "Êtes-vous toujours dans les gradins ?",
+      offline_body: "Nous avons perdu la connexion avec le flux d'intelligence.",
+      retry: "RÉESSAYER LA CONNEXION"
+    }
+  },
+
+  /**
+   * Translates a key based on the current system language.
+   * @param {string} key - Dictionary key
+   * @returns {string} Translated value or key if not found
+   */
+  t(key) { return this.translations[this.currentLang]?.[key] || key; }
+};
