@@ -1,0 +1,99 @@
+/** ARIA — Design Tokens & Global Styles */
+
+:root {
+  --color-background-lowest: #0a0e1a;
+  --color-background: #0f131f;
+  --color-surface: #0f131f;
+  --color-surface-low: #171b28;
+  --color-surface-high: #262a37;
+  --color-surface-highest: #313442;
+  --color-surface-bright: #353946;
+  --color-surface-variant: rgba(49, 52, 66, 0.6);
+
+  --color-primary: #b0c6ff;
+  --color-primary-container: #558dff;
+  --color-on-primary: #002d6e;
+
+  --color-secondary: #fff3d2;
+  --color-secondary-container: #fdd400;
+  --color-on-secondary: #3a3000;
+
+  --color-tertiary: #7ad0ff;
+  --color-on-tertiary: #003549;
+
+  --color-on-surface: #dfe2f3;
+  --color-on-surface-variant: #c2c6d7;
+  --color-outline: #8c90a0;
+  --color-outline-variant: rgba(66, 70, 85, 0.15);
+
+  --color-error: #ffb4ab;
+  --color-on-error: #690005;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  --shadow-glow: 0 0 32px 0 rgba(176, 198, 255, 0.06);
+  --glass-blur: blur(20px);
+}
+
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 4px rgba(176, 198, 255, 0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, .display-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+main {
+  flex: 1;
+  padding: var(--spacing-md);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.screen { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (min-width: 768px) {
+  main { padding: var(--spacing-xl); }
+}
