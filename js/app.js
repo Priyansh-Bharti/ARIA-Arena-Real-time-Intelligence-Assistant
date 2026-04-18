@@ -4,12 +4,12 @@
  * @module app
  */
 
-import { askAria } from './gemini.js';
-import { initFirebase, trackEvent } from './firebase.js';
-import { initArenaMap, routeToDestination, drawAnimatedRoute } from './maps.js';
-import { requestNotificationPermission, handleVenueAlertTriggers } from './notifications.js';
-import { i18n } from './i18n.js';
-import { sanitize, debug } from './utils.js';
+import { askAria } from './gemini.js?v=4';
+import { initFirebase, trackEvent } from './firebase.js?v=4';
+import { initArenaMap, routeToDestination, drawAnimatedRoute } from './maps.js?v=4';
+import { requestNotificationPermission, handleVenueAlertTriggers } from './notifications.js?v=4';
+import { i18n } from './i18n.js?v=4';
+import { sanitize, debug } from './utils.js?v=4';
 
 /* ── Global App Configuration ───────────────────────────────────── */
 

@@ -12,7 +12,7 @@ let requestCount = 0;
 let windowStart = Date.now();
 const MAX_RPM = 10; // Quota: 10 requests per rolling 60-second window
 
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
 
 /* ── System Persona & Guardrails ────────────────────────────────── */
 
@@ -69,17 +69,22 @@ export async function askAria(userPrompt, context = {}) {
     FAN QUERY: ${userPrompt}
   `;
 
-  const response = await fetch(`${API_URL}?key=${apiKey}`, {
+  const API_V1BETA = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+  const response = await fetch(API_V1BETA, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       contents: [{ parts: [{ text: fullPrompt }] }],
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      generationConfig: { response_mime_type: 'application/json', temperature: 0.7 }
+      system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      generation_config: { response_mime_type: 'application/json', temperature: 0.7 }
     })
   });
 
-  if (!response.ok) throw new Error('Gemini API unreachable');
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    throw new Error(`Gemini API Error (${response.status}): ${errorBody.error?.message || 'Unreachable'}`);
+  }
 
   const data = await response.json();
   const rawText = data.candidates[0].content.parts[0].text;
