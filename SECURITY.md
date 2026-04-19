@@ -9,7 +9,7 @@ The current `1.x` line is the supported submission version for ARIA.
 Please do not open a public issue for security-sensitive findings.
 
 Report vulnerabilities privately by opening a GitHub security advisory at:  
-`https://github.com/Priyansh-Bharti/ARIA---Arena-Real-time-Intelligence-Assistant/security/advisories`
+`https://github.com/Priyansh-Bharti/ARIA-Arena-Real-time-Intelligence-Assistant/security/advisories`
 
 Please include:
 - A short description of the issue
