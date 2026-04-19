@@ -68,8 +68,12 @@ app.get('*', (req, res) => {
 if (require.main === module) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[ARIA Enterprise] Server listening on port ${PORT}`);
-    // Start background services
-    startEventLogger(require('firebase/app').getApp());
+    // Start background services gracefully (non-blocking)
+    try {
+      startEventLogger();
+    } catch (err) {
+      console.warn('[ARIA] Event logger offline (Firebase config not present):', err.message);
+    }
   });
 }
 
