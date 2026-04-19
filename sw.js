@@ -3,7 +3,7 @@
  * Handles offline asset caching, dynamic fetch intercepting, and background notifications.
  */
 
-const CACHE_NAME = 'aria-cache-v3';
+const CACHE_NAME = 'aria-cache-v5';
 
 const asset = (path) => new URL(path, self.location).href;
 
