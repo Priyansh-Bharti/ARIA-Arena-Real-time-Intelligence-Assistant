@@ -46,21 +46,24 @@ ARIA addresses the critical logistical challenges of megavenues — where 50,000
 
 ## 🧠 Approach and Logic
 
-We architected ARIA around a three-layer intelligence pipeline:
+ARIA is built around a **three-engine architecture** with strict separation of concerns:
 
-1. **AI Brain (Gemini 2.5 Flash)** — acts as an intent parser, not just a chatbot. Converts natural language ("I'm hungry") into structured JSON output containing coordinates, route targets, and contextual tips.
-2. **Real-time Nervous System (Firebase RTDB)** — streams live venue state (crowd density, game phase, gate status) to every connected fan simultaneously without polling.
-3. **Spatial Navigation Layer (Google Maps JS API)** — consumes Gemini's route output and renders animated, real-time polylines across the stadium, with a Satellite toggle for spatial clarity.
+1. **Crowd Engine (`engine/crowdEngine.js`)** — Simulates live venue crowd density using Gaussian-noise time-of-day curves for 5 game phases (pre-match → post-match). Merges real Firebase RTDB data, predicts short-term congestion, and surfaces hotspot zones. This is the single source of truth for all crowd state.
+2. **Decision Engine (`engine/decisionEngine.js`)** — Implements Dijkstra's shortest-path algorithm on a 15-node venue graph with 24 bidirectional edges. Applies live crowd-density penalties per edge. Supports 5 routing priority modes. **Routing is always deterministic — AI never decides the path.**
+3. **AI Engine (`engine/aiEngine.js`)** — Isolated Gemini integration. Receives the pre-computed Dijkstra route and phrases it as a natural-language narrative. AI is architecturally prevented from making routing decisions — this eliminates prompt-injection attacks and ensures auditable, explainable paths.
+
+All three engines feed a thin HTTP adapter layer (`routes/`) and a real-time Firebase nervous system that streams live state to every connected frontend simultaneously.
 
 ---
 
 ## ⚙️ How the Solution Works
 
 1. **Onboarding** — A fan enters their section/row. ARIA registers their spatial position within the venue grid.
-2. **Context-Aware Query** — The AI receives the user's message bundled with their seat location + live stadium state (e.g., "Gate 1 is currently High density").
-3. **Structured Response** — Gemini returns strict JSON: `{ directions, targetId, tip }`.
-4. **Wayfinding** — `maps.js` parses `targetId`, resolves the coordinate from `VENUE_ZONES`, and animates a blue polyline route directly on the Google Map.
-5. **Satellite Toggle** — Users can switch from dark-mode roadmap to photorealistic satellite imagery for spatial orientation.
+2. **Crowd Engine tick** — Gaussian-noise simulation (5 game phases) generates per-zone density; Firebase RTDB live data overrides simulated values in real time.
+3. **Fan query received** — User message is sanitized, language-detected, and bundled with the live Venue Digital Twin context.
+4. **Decision Engine routing** — Dijkstra's algorithm runs on the crowd-penalised graph using the selected routing mode (balanced / low_crowd / accessible / family_friendly / fast_exit).
+5. **AI Engine narrates** — Gemini receives the computed route steps and rephrases them as a friendly walking narrative in the fan's chosen language.
+6. **Map renders** — Google Maps JS API animates a polyline along the computed path coordinates. Satellite toggle available for spatial orientation.
 
 ---
 
@@ -77,18 +80,20 @@ We architected ARIA around a three-layer intelligence pipeline:
 
 | Feature | Description |
 |---|---|
-| **Gemini 2.5 Flash AI** | Context-aware, structured JSON responses with seat-location awareness |
-| **Real-time Telemetry** | Firebase RTDB live crowd density and game phase broadcast |
-| **IoT Sensor Simulator** | Gaussian-noise crowd data published to Firebase RTDB every 5 seconds |
-| **Venue Digital Twin** | `venueTwin.js` merges static venue blueprint with live sensor state |
-| **Spatial Wayfinding** | Animated Google Maps polyline routing with custom venue markers |
-| **Satellite Toggle** | Switch between dark roadmap and photorealistic satellite imagery |
+| **Dijkstra Pathfinding** | Deterministic shortest-path routing on a 15-node venue graph with 24 edges |
+| **5 Routing Modes** | `balanced`, `fast_exit`, `low_crowd`, `accessible`, `family_friendly` — each with different crowd and accessibility penalty weights |
+| **Crowd Engine** | Gaussian-noise simulation across 5 game phases + Firebase live data merging + short-term congestion prediction |
+| **Decision Engine** | AI-isolated routing — Gemini never decides the path; Dijkstra always does |
+| **AI Engine** | Gemini 2.5 Flash phrases the pre-computed route — grounded narration, never hallucinated routing |
+| **Venue Digital Twin** | `venueTwin.js` merges static blueprint + live sensor state for AI context injection |
+| **Real-time Telemetry** | Firebase RTDB live crowd density with IoT Gaussian-noise simulator every 5 seconds |
+| **Spatial Wayfinding** | Animated Google Maps polyline routing with satellite toggle and custom markers |
 | **Multilingual Support** | Runtime i18n switching across EN, HI, ES, FR, AR, ZH (6 languages, RTL-aware) |
-| **PWA Offline Mode** | Service Worker v5 caching all static assets |
+| **PWA Offline Mode** | Service Worker v5 caching all static assets — works at venue without internet |
 | **BigQuery Analytics** | Venue telemetry streaming to GCP Data Warehouse |
 | **Cloud Storage Uploads** | Receipt/ticket photo uploads via `POST /api/upload/receipt` → GCS signed URL |
 | **SSE Streaming Chat** | Server-Sent Events for real-time token-by-token Gemini responses |
-| **WCAG 2.1 AA** | Full accessibility compliance with `aria-live` regions and semantic HTML |
+| **WCAG 2.1 AA** | Full accessibility compliance — `ACCESSIBILITY.md` policy document included |
 
 ---
 
@@ -102,23 +107,34 @@ We architected ARIA around a three-layer intelligence pipeline:
 │  │ (Router) │  │ (AI Core)│  │ (Spatial)│  │ (RTDB)    │   │
 │  └──────────┘  └──────────┘  └──────────┘  └───────────┘   │
 └────────────────────────┬────────────────────────────────────┘
-                         │ HTTP
+                         │ HTTP / SSE
 ┌────────────────────────┴────────────────────────────────────┐
-│              Node.js + Express Production Server            │
-│  ┌───────────────┐  ┌──────────────┐  ┌─────────────────┐  │
-│  │ routes/venue  │  │ routes/chat  │  │ routes/upload   │  │
-│  │ routes/      │  │ (SSE+Gemini) │  │ (Cloud Storage) │  │
-│  │ analytics    │  └──────────────┘  └─────────────────┘  │
-│  │ wayfinding   │                                          │
-│  └───────────────┘                                         │
-│  venueTwin.js · venueContext.js · eventLogger.js            │
+│              Node.js + Express (HTTP Adapter Layer)         │
+│  routes/venue · routes/chat · routes/wayfinding             │
+│  routes/analytics · routes/upload                           │
 │  helmet · cors · express-rate-limit · express-validator     │
-└────────────────────────┬────────────────────────────────────┘
-                         │
-┌────────────────────────┴────────────────────────────────────┐
-│              Google Cloud Infrastructure (7 Services)        │
-│  Cloud Run · Cloud Build · BigQuery · Cloud Storage          │
-│  Firebase Auth/RTDB · Gemini 2.5 Flash · Maps JS API         │
+└────────────┬────────────────────────────────────────────────┘
+             │ delegates to
+┌────────────┴────────────────────────────────────────────────┐
+│                  3-Engine Core (Deterministic)              │
+│  ┌──────────────────┐  ┌──────────────────┐                 │
+│  │ crowdEngine.js   │  │ decisionEngine.js│                 │
+│  │ Gaussian noise   │  │ Dijkstra algo    │                 │
+│  │ Phase multipliers│  │ 5 routing modes  │                 │
+│  │ Firebase merge   │  │ Crowd penalties  │                 │
+│  │ Hotspot detect   │  │ Accessibility    │                 │
+│  └──────────────────┘  └──────────────────┘                 │
+│  ┌──────────────────┐  ┌──────────────────┐                 │
+│  │  aiEngine.js     │  │  venueTwin.js    │                 │
+│  │  Gemini narrates │  │  Digital twin    │                 │
+│  │  NEVER routes    │  │  Live state      │                 │
+│  └──────────────────┘  └──────────────────┘                 │
+└────────────┬────────────────────────────────────────────────┘
+             │
+┌────────────┴────────────────────────────────────────────────┐
+│         Google Cloud Infrastructure (7 Services)            │
+│  Cloud Run · Cloud Build · BigQuery · Cloud Storage         │
+│  Firebase Auth/RTDB · Gemini 2.5 Flash · Maps JS API        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -134,12 +150,15 @@ We architected ARIA around a three-layer intelligence pipeline:
 | **Database** | Firebase Auth + Realtime Database | Live crowd state, event logging, user sessions |
 | **Analytics** | Google Cloud BigQuery | Venue telemetry and crowd movement forecasting |
 | **Storage** | Google Cloud Storage | Receipt/ticket photo uploads with signed URLs |
-| **Backend** | Node.js + Express | 5-route modular REST API with security middleware |
-| **Security** | Helmet, CORS Whitelist, express-rate-limit, express-validator | Enterprise-grade HTTP hardening + input validation |
+| **Routing Engine** | Dijkstra's algorithm (`engine/decisionEngine.js`) | Deterministic crowd-aware pathfinding — 5 priority modes |
+| **Crowd Engine** | Gaussian noise + Firebase RTDB (`engine/crowdEngine.js`) | Time-of-day simulation, prediction, hotspot detection |
+| **AI Engine** | Gemini 2.5 Flash isolated (`engine/aiEngine.js`) | Narration-only — never makes routing decisions |
+| **Backend** | Node.js + Express | 5-route thin HTTP adapter layer + security middleware |
+| **Security** | Helmet, CORS Whitelist, express-rate-limit, express-validator, `SECURITY.md` | Enterprise-grade hardening + policy documentation |
 | **CI/CD** | Google Cloud Build (`cloudbuild.yaml`) | Automated build + deploy pipeline |
 | **Hosting** | Google Cloud Run | Auto-scaling containerized deployment |
-| **Testing** | Jest + supertest | 7 test files: unit, AI, maps, integration, API, language |
-| **Quality** | ESLint, Prettier, JSDoc | Enforced code standards and documentation |
+| **Testing** | Jest + supertest | 14 test files · 195+ test cases |
+| **Quality** | ESLint, Prettier, JSDoc | Enforced code standards and inline documentation |
 
 ---
 
@@ -151,9 +170,12 @@ We architected ARIA around a three-layer intelligence pipeline:
 | `GET` | `/api/venue/zones` | Returns all venue zones with IDs and types |
 | `GET` | `/api/venue/status` | Returns live game phase and crowd density |
 | `POST` | `/api/analytics` | Logs a named event to Google Cloud BigQuery |
-| `POST` | `/api/chat` | SSE-streamed Gemini 2.5 response with live twin context |
-| `GET` | `/api/wayfinding/zones` | Returns all navigable venue zones |
-| `POST` | `/api/wayfinding/resolve` | Resolves a destination ID to coordinates + walk time |
+| `POST` | `/api/chat` | SSE-streamed Gemini 2.5 response with live Digital Twin context |
+| `GET` | `/api/wayfinding/zones` | Returns all 15 navigable venue zones with coordinates |
+| `POST` | `/api/wayfinding/resolve` | **Dijkstra route** from entrance → target with crowd penalties |
+| `GET` | `/api/wayfinding/modes` | Lists all 5 routing modes with descriptions |
+| `GET` | `/api/wayfinding/crowd` | Live crowd state + hotspots from Crowd Engine |
+| `GET` | `/api/wayfinding/graph` | Venue graph: nodes, edges, distances (for visualisation) |
 | `POST` | `/api/upload/receipt` | Uploads stadium receipt to Google Cloud Storage → signed URL |
 | `GET` | `/api/upload/status` | Reports Cloud Storage connection status |
 
@@ -163,12 +185,12 @@ We architected ARIA around a three-layer intelligence pipeline:
 
 | Criterion | Implementation |
 |---|---|
-| **Code Quality** | ESLint-enforced, 5 modular routes (`analytics`, `venue`, `wayfinding`, `chat`, `upload`), `venueTwin.js` digital twin pattern, `venueContext.js` data layer, full JSDoc documentation |
-| **Security** | Strict Helmet CSP, CORS whitelist, DDoS rate-limiting, `express-validator` input sanitization on all routes, `firebase.rules` DB-level auth, `.gcloudignore` secret isolation |
-| **Efficiency** | Zero-framework Vanilla JS, Service Worker v5 caching, `npm prune --omit=dev` lean container, JSON body limits, Cloud Run auto-scaling |
-| **Testing** | 7-file test suite: unit, AI edge cases, maps fallback, state integration, live HTTP API (supertest), language tests (6 langs), global mock setup (setup.js) |
-| **Accessibility** | WCAG 2.1 AA, `aria-live` polite regions, semantic HTML5, RTL support for Arabic, 6-language i18n (EN/HI/ES/FR/AR/ZH), keyboard navigable, high-contrast dark theme |
-| **Google Services** | **7 services**: Gemini 2.5 Flash, Google Maps API + Satellite, Firebase Auth/RTDB, Google Cloud Run, Cloud Build CI/CD, BigQuery analytics, Cloud Storage uploads |
+| **Code Quality** | 3-engine architecture (`crowdEngine`, `decisionEngine`, `aiEngine`) with strict separation of concerns. Thin HTTP adapters in `routes/`. Dijkstra pathfinding with 5 routing modes. AI-isolated narration. Full JSDoc + ESLint throughout. |
+| **Security** | Helmet CSP, CORS whitelist, rate-limiting, `express-validator` on all POST routes, `firebase.rules` DB-level auth, `.gcloudignore` secret isolation, `SECURITY.md` policy document |
+| **Efficiency** | Zero-framework Vanilla JS, Service Worker v5 caching (offline-capable), `npm prune --omit=dev` lean Docker image, deterministic Dijkstra routing (no AI latency in path computation) |
+| **Testing** | **14 test files · 195+ test cases** — unit, AI schema, maps/coordinate, integration flows, live HTTP (supertest), 6-language i18n, security headers, performance benchmarks, venue contracts, upload, wayfinding, digital twin lifecycle, analytics, crowd engine |
+| **Accessibility** | WCAG 2.1 AA · `ACCESSIBILITY.md` policy document · `aria-live` regions · RTL Arabic · 6-language i18n (EN/HI/ES/FR/AR/ZH) · `accessible` and `family_friendly` routing modes · keyboard navigable |
+| **Google Services** | **7 services**: Gemini 2.5 Flash, Google Maps JS API + Satellite, Firebase Auth/RTDB, Google Cloud Run, Cloud Build CI/CD, BigQuery analytics, Cloud Storage uploads |
 
 ---
 
@@ -225,20 +247,31 @@ ARIA/
 ├── venueTwin.js                (Digital twin — live state store)
 ├── eventLogger.js              (Firebase push() every 30s — audit trail)
 ├── sensorSimulator.js          (IoT Gaussian-noise crowd data → Firebase)
+├── engine/
+│   ├── crowdEngine.js          (Crowd simulation — Gaussian noise, phase curves, Firebase merge, prediction)
+│   ├── decisionEngine.js       (Dijkstra routing — 5 modes, crowd penalties, accessibility flags)
+│   └── aiEngine.js             (Gemini isolation — narrates routes, NEVER decides them)
 ├── routes/
 │   ├── analytics.js            (BigQuery event logging API)
 │   ├── venue.js                (Venue zones and status API)
-│   ├── wayfinding.js           (Destination resolver + zone listing)
-│   ├── chat.js                 (SSE-streamed Gemini chat API)
+│   ├── wayfinding.js           (HTTP adapter → decisionEngine + crowdEngine)
+│   ├── chat.js                 (SSE-streamed Gemini chat → aiEngine)
 │   └── upload.js               (Google Cloud Storage receipt upload)
 ├── tests/
 │   ├── setup.js                (Global Jest mocks — Firebase, Maps, fetch)
-│   ├── unit.test.js            (Core utility and i18n specs)
-│   ├── gemini.test.js          (AI edge case and rate limit specs)
-│   ├── maps.test.js            (Routing fallback and toggle specs)
-│   ├── integration.test.js     (State-to-router flow specs)
-│   ├── api.test.js             (Live HTTP endpoint specs via supertest)
-│   └── languageTests.js        (i18n validation for all 6 languages)
+│   ├── unit.test.js            (35 tests — utilities, i18n, state, sanitization)
+│   ├── gemini.test.js          (22 tests — schema, sanitization, fallback, JSON parsing)
+│   ├── maps.test.js            (20 tests — zone resolution, coords, Haversine, satellite)
+│   ├── integration.test.js     (25 tests — login flow, wayfinding, crowd, lifecycle)
+│   ├── api.test.js             (5 tests  — live HTTP endpoint specs via supertest)
+│   ├── languageTests.js        (12 tests — i18n validation for all 6 languages)
+│   ├── security.test.js        (13 tests — headers, validation, rate limits)
+│   ├── performance.test.js     (12 tests — response time, concurrency, memory)
+│   ├── venue.test.js           (13 tests — zone listing, status, data contracts)
+│   ├── upload.test.js          (10 tests — GCS upload, fallback, filename contract)
+│   ├── wayfinding.test.js      (15 tests — resolver, coordinates, response format)
+│   ├── venueTwin.test.js       (25 tests — twin lifecycle, merge, schema updates)
+│   └── analytics.test.js      (13 tests — BigQuery logging, degradation, validation)
 ├── js/
 │   ├── app.js                  (Main controller and screen router)
 │   ├── gemini.js               (Hardened AI request controller)
