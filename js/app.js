@@ -25,6 +25,7 @@ const State = {
   userSeat: { section: '', row: '', seatId: '' },
   gamePhase: 'Pre-Match',
   venueData: {},
+  lastDirections: '', 
   isAriaThinking: false
 };
 
@@ -109,7 +110,9 @@ const TEMPLATES = {
       <div id="full-map" style="height: 400px; border-radius: var(--radius-lg); background: var(--color-background-lowest); border: 1px solid var(--color-outline-variant); margin-bottom: var(--spacing-lg); overflow: hidden;"></div>
       <div id="text-directions">
         <h2 class="form-label">DIRECTIONS</h2>
-        <div id="directions-list" style="color: var(--color-on-surface-variant);">Select a destination to begin...</div>
+        <div id="directions-list" style="color: var(--color-on-surface-variant); font-size: 0.875rem; line-height: 1.6;">
+          ${State.lastDirections || 'Select a destination to begin...'}
+        </div>
       </div>
     </section>
   `
@@ -166,7 +169,9 @@ function init() {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data?.type === 'NAVIGATE') {
-        navigateTo(event.data.screen.toUpperCase());
+        const screen = event.data.screen.toUpperCase();
+        if (event.data.text) State.lastDirections = event.data.text;
+        navigateTo(screen);
         // Delay routing slightly to ensure map is initialized
         if (event.data.target) setTimeout(() => routeToDestination(event.data.target), 500);
       }
@@ -234,6 +239,7 @@ async function handleAriaRequest(prompt) {
       language: i18n.currentLang
     });
     
+    State.lastDirections = response.route; 
     displayAriaResponse(response);
     
     // Proactive: Draw destination if the AI suggests a specific point

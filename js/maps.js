@@ -7,6 +7,7 @@
 import { debug } from './utils.js';
 
 let map, routePath;
+let lastRoute = null;
 
 const STADIUM_COORDS = { lat: 51.5560, lng: -0.2796 };
 const COLORS = { primary: '#2979FF', bg: '#0F131F', accent: '#FFF3D2' };
@@ -70,6 +71,10 @@ export async function initArenaMap(containerId, isCompact = false) {
   el.dataset.initialized = 'true';
   el.setAttribute('aria-label', 'Stadium navigation map');
   addMarkers();
+
+  if (lastRoute) {
+    drawAnimatedRoute(lastRoute.start, lastRoute.end);
+  }
 }
 
 function loadScript(key) {
@@ -127,12 +132,23 @@ export function drawAnimatedRoute(start = STADIUM_COORDS, end) {
   if (!map || !end) return;
   if (routePath) routePath.setMap(null);
 
+  lastRoute = { start, end };
+
   routePath = new google.maps.Polyline({
     path: [start, start],
     geodesic: true,
     strokeColor: COLORS.primary,
-    strokeOpacity: 1.0,
-    strokeWeight: 4,
+    strokeOpacity: 0,
+    icons: [{
+      icon: {
+        path: 'M 0,-1 0,1',
+        strokeOpacity: 1,
+        scale: 3,
+        strokeColor: COLORS.primary
+      },
+      offset: '0',
+      repeat: '15px'
+    }],
     map
   });
 
