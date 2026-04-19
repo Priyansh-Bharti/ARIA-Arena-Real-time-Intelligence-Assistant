@@ -14,6 +14,7 @@ const cors = require('cors');
 const analyticsRouter = require('./routes/analytics');
 const venueRouter = require('./routes/venue');
 const wayfindingRouter = require('./routes/wayfinding');
+const chatRouter = require('./routes/chat');
 const { startEventLogger } = require('./eventLogger');
 
 const app = express();
@@ -56,6 +57,7 @@ app.use(express.static(__dirname));
 app.use('/api', analyticsRouter);
 app.use('/api/venue', venueRouter);
 app.use('/api/wayfinding', wayfindingRouter);
+app.use('/api/chat', chatRouter);
 
 // ─── SPA Fallback (PWA Routing) ───────────────────────────────────────────────
 app.get('*', (req, res) => {
