@@ -110,9 +110,12 @@ const TEMPLATES = {
 
   [CONFIG.SCREENS.MAP]: () => `
     <section class="screen animate-fade-in">
-      <header style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
-        <button class="chip" id="btn-map-back">${i18n.t('back')}</button>
-        <h1 style="font-size: 1.25rem;">${i18n.t('wayfinding')}</h1>
+      <header style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg);">
+        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+          <button class="chip" id="btn-map-back">${i18n.t('back')}</button>
+          <h1 style="font-size: 1.25rem;">${i18n.t('wayfinding')}</h1>
+        </div>
+        <button class="chip chip-primary" id="btn-toggle-view" style="font-size: 0.75rem;">SATELLITE</button>
       </header>
       <div id="full-map" style="height: 400px; border-radius: var(--radius-lg); background: var(--color-background-lowest); border: 1px solid var(--color-outline-variant); margin-bottom: var(--spacing-lg); overflow: hidden;"></div>
       <div id="text-directions">
@@ -217,6 +220,14 @@ function bindEvents() {
 
     if (id === 'btn-view-map') navigateTo(CONFIG.SCREENS.MAP);
     if (id === 'btn-map-back') navigateTo(CONFIG.SCREENS.ASSISTANT);
+    
+    // Toggle Map Type (Roadmap <-> Satellite)
+    if (id === 'btn-toggle-view') {
+      import('./maps.js').then(m => {
+        const isSatellite = m.toggleMapType();
+        e.target.textContent = isSatellite ? 'ROADMAP' : 'SATELLITE';
+      });
+    }
 
     if (id === 'aria-send-btn') {
       const input = document.getElementById('aria-input');

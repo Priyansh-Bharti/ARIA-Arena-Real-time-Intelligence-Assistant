@@ -171,3 +171,15 @@ export function drawAnimatedRoute(start = STADIUM_COORDS, end) {
     }]);
   }, 20);
 }
+
+/**
+ * Toggles the map between Roadmap and Satellite view.
+ * @returns {boolean} True if the map is now in satellite mode.
+ */
+export function toggleMapType() {
+  if (!map) return false;
+  const current = map.getMapTypeId();
+  const next = current === 'roadmap' ? 'satellite' : 'roadmap';
+  map.setMapTypeId(next);
+  return next === 'satellite';
+}
