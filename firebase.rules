@@ -1,0 +1,29 @@
+{
+  "rules": {
+    ".read": "auth != null",
+    ".write": "auth != null",
+    "venue": {
+      ".read": "true",
+      "crowd_density": {
+        "$gate_id": {
+          ".validate": "newData.isString() && newData.val().length > 0"
+        }
+      },
+      "game_phase": {
+        ".validate": "newData.isString()"
+      }
+    },
+    "sessions": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid",
+        ".validate": "newData.hasChildren(['section', 'timestamp'])"
+      }
+    },
+    "analytics": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      ".indexOn": ["timestamp"]
+    }
+  }
+}
