@@ -75,9 +75,16 @@ const TEMPLATES = {
         </div>
         <div id="mini-map" style="height: 160px; border-radius: var(--radius-md); background: #111; margin-bottom: var(--spacing-md); overflow: hidden;"></div>
         <div id="aria-text-response">
-          <p style="font-weight: 600; margin-bottom: var(--spacing-md);">Welcome to Section ${State.userSeat.section}. ARIA is monitoring live crowd density for your gate.</p>
+          <p style="font-weight: 600; margin-bottom: var(--spacing-md);">${i18n.t('aria_welcome_text') || 'How can I assist you today?'}</p>
         </div>
-        <button class="btn btn-secondary" style="width: 100%; border: none; color: var(--color-on-surface-variant);" id="btn-view-map">${i18n.t('view_map')} →</button>
+        
+        <!-- Modern Integrated Chat Input -->
+        <div class="chat-input-wrapper" style="margin-top: var(--spacing-md); display: flex; gap: var(--spacing-sm);">
+          <input type="text" id="aria-input" class="input-field" placeholder="Ask about gates, food, exits..." style="flex: 1; border-color: var(--color-outline-variant);">
+          <button class="btn btn-primary" id="aria-send-btn" style="padding: 0 var(--spacing-md);">SEND</button>
+        </div>
+
+        <button class="btn btn-secondary" style="width: 100%; border: none; color: var(--color-on-surface-variant); margin-top: var(--spacing-md);" id="btn-view-map">${i18n.t('view_map')} →</button>
       </article>
 
       <div class="quick-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); margin-bottom: var(--spacing-xxl);">
@@ -211,13 +218,20 @@ function bindEvents() {
     if (id === 'btn-view-map') navigateTo(CONFIG.SCREENS.MAP);
     if (id === 'btn-map-back') navigateTo(CONFIG.SCREENS.ASSISTANT);
 
-    // AI Concierge Prompt
-    if (id === 'concierge-trigger') {
-      const userPrompt = prompt('Ask ARIA about the stadium:');
+    if (id === 'aria-send-btn') {
+      const input = document.getElementById('aria-input');
+      const userPrompt = input.value.trim();
       if (userPrompt) {
-        if (State.currentScreen !== CONFIG.SCREENS.ASSISTANT) navigateTo(CONFIG.SCREENS.ASSISTANT);
         handleAriaRequest(userPrompt);
+        input.value = ''; // Clear after sending
       }
+    }
+
+    if (id === 'concierge-trigger') {
+      if (State.currentScreen !== CONFIG.SCREENS.ASSISTANT) {
+        navigateTo(CONFIG.SCREENS.ASSISTANT);
+      }
+      setTimeout(() => document.getElementById('aria-input')?.focus(), 100);
     }
   });
 }
