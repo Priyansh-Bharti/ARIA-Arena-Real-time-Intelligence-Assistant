@@ -177,9 +177,16 @@ export function drawAnimatedRoute(start = STADIUM_COORDS, end) {
  * @returns {boolean} True if the map is now in satellite mode.
  */
 export function toggleMapType() {
-  if (!map) return false;
-  const current = map.getMapTypeId();
-  const next = current === 'roadmap' ? 'satellite' : 'roadmap';
-  map.setMapTypeId(next);
-  return next === 'satellite';
+  if (!map || !window.google) return false;
+  
+  // Use explicit Google Maps constants to guarantee the map type string matches
+  const isSatellite = map.getMapTypeId() === google.maps.MapTypeId.SATELLITE || map.getMapTypeId() === 'satellite';
+  const nextType = isSatellite ? google.maps.MapTypeId.ROADMAP : google.maps.MapTypeId.SATELLITE;
+  
+  map.setMapTypeId(nextType);
+  
+  // When switching back to roadmap, we must re-apply the dark style
+  map.setOptions({ styles: isSatellite ? DARK_STYLE : null });
+  
+  return !isSatellite;
 }
