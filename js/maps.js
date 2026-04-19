@@ -77,6 +77,11 @@ export async function initArenaMap(containerId, isCompact = false) {
   }
 }
 
+/**
+ * Injects the Google Maps JavaScript SDK into the DOM dynamically.
+ * @param {string} key - The valid Google Maps Platform API key
+ * @returns {Promise<void>} Resolves when the SDK is fully loaded
+ */
 function loadScript(key) {
   return new Promise((resolve) => {
     const s = document.createElement('script');
@@ -88,6 +93,9 @@ function loadScript(key) {
   });
 }
 
+/**
+ * Renders interactive markers for all points of interest defined in VENUE_ZONES.
+ */
 function addMarkers() {
   VENUE_ZONES.forEach(zone => {
     new google.maps.Marker({

@@ -19,7 +19,9 @@
 | Frontend | HTML5, CSS3, Vanilla JS (ES Modules) |
 | AI | Gemini 2.5 Flash |
 | Data | Firebase Auth, Realtime Database, Analytics |
+| Enterprise | Google Cloud Run, GCP BigQuery (Analytics Bridge) |
 | Maps | Google Maps JavaScript API |
+| Testing | Jest, ESLint |
 | Hosting | Google Cloud Run / Firebase |
 
 ## ⚙️ Setup
@@ -54,16 +56,15 @@
 - **Throttling**: Gemini requests rate-limited to 10/min per session (sliding window).
 - **Zero Leaks**: All debug logs gated behind `debug()` utility.
 
-## 🧪 Testing Matrix
-
-| # | Case | Expected |
-|---|------|----------|
-| 1 | Empty section submit | Red border, `aria-invalid`, focus |
-| 2 | Quick action (Food) | AI response with route coords + local pro tip |
-| 3 | 11th request in 60s | Rate limit error alert in UI |
-| 4 | Offline state | Service Worker serves `offline.html` fallback |
-| 5 | Phase change → Halftime | Idempotent haltime notification (one-time only) |
 | 6 | Gate Spike → High | Automated gate warning with bypass cooldown |
+
+## 🛠️ Automated Quality Assurance
+
+ARIA maintains high code standards through:
+- **Unit Testing**: Professional test suite in `/tests` validating i18n and security logic.
+- **Linting**: ESLint configuration for consistent, error-free JavaScript.
+- **Architectural Scalability**: Decoupled modules and a production-grade Express bridge.
+- **Analytics Bridge**: Integrated BigQuery pulse-logging for fan movement forecasting.
 
 ## 📁 Project Structure
 
