@@ -23,7 +23,7 @@ const checkRateLimit = (ip) => {
 const validateChat = [
   body('message').isString().trim().isLength({ min: 1, max: 500 }).withMessage('Message must be 1-500 chars'),
   body('section').optional().isString().trim(),
-  body('lang').optional().isIn(['en', 'hi', 'es', 'fr']).withMessage('Unsupported language'),
+  body('lang').optional().isIn(['en', 'hi', 'es', 'fr', 'ar', 'zh']).withMessage('Unsupported language'),
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
