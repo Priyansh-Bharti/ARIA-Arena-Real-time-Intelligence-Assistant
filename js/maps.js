@@ -62,7 +62,6 @@ export async function initArenaMap(containerId, isCompact = false) {
   map = new google.maps.Map(el, {
     center: STADIUM_COORDS,
     zoom: isCompact ? 16 : 17,
-    mapId: 'ARIA_VENUE_MAP',
     disableDefaultUI: true,
     zoomControl: true,
     styles: DARK_STYLE
