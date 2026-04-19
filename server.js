@@ -15,6 +15,7 @@ const analyticsRouter = require('./routes/analytics');
 const venueRouter = require('./routes/venue');
 const wayfindingRouter = require('./routes/wayfinding');
 const chatRouter = require('./routes/chat');
+const uploadRouter = require('./routes/upload');
 const { startEventLogger } = require('./eventLogger');
 
 const app = express();
@@ -48,7 +49,7 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // ─── Body Parsing ──────────────────────────────────────────────────────────────
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '10mb' })); // 10mb for base64 image uploads
 
 // ─── Static Assets ─────────────────────────────────────────────────────────────
 app.use(express.static(__dirname));
@@ -58,6 +59,7 @@ app.use('/api', analyticsRouter);
 app.use('/api/venue', venueRouter);
 app.use('/api/wayfinding', wayfindingRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/upload', uploadRouter);
 
 // ─── SPA Fallback (PWA Routing) ───────────────────────────────────────────────
 app.get('*', (req, res) => {

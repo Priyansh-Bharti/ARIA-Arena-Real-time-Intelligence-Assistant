@@ -18,7 +18,8 @@
     "firebase": "^10.8.0",
     "firebase-admin": "^11.11.0",
     "@google-cloud/bigquery": "^7.3.0",
-    "@google/generative-ai": "^0.2.1"
+    "@google-cloud/storage": "^7.7.0",
+    "@google/generative-ai": "^0.21.0"
   },
   "devDependencies": {
     "jest": "^29.7.0",
