@@ -70,11 +70,19 @@ app.get('*', (req, res) => {
 if (require.main === module) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[ARIA Enterprise] Server listening on port ${PORT}`);
-    // Start background services gracefully (non-blocking)
+
+    // Start event audit logger (Firebase push every 30s)
     try {
       startEventLogger();
     } catch (err) {
       console.warn('[ARIA] Event logger offline (Firebase config not present):', err.message);
+    }
+
+    // Start IoT sensor simulator (Firebase RTDB crowd density every 5s)
+    try {
+      require('./sensorSimulator');
+    } catch (err) {
+      console.warn('[ARIA] Sensor simulator offline (Firebase config not present):', err.message);
     }
   });
 }
