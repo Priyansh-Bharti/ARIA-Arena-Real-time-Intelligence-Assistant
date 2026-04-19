@@ -8,7 +8,7 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
-const venueContext = require('../venueContext');
+const { getTwinContext } = require('../venueTwin');
 
 /** Per-IP rate limiter (2s cooldown between requests) */
 const rateLimits = new Map();
@@ -54,10 +54,12 @@ router.post('/', validateChat, async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  const systemPrompt = `You are ARIA, the official AI concierge for ${venueContext.metadata.name}.
+  const twinContext = getTwinContext();
+  const systemPrompt = `You are ARIA, the official AI concierge for ${twinContext.metadata.name}.
 The fan is seated in section: ${section}.
-Current event: ${venueContext.metadata.currentEvent.name} — Status: ${venueContext.metadata.currentEvent.status}.
-Gate statuses: ${JSON.stringify(venueContext.gates)}.
+Current event: ${twinContext.metadata.currentEvent.name} — Status: ${twinContext.metadata.currentEvent.status}.
+Live crowd density: ${JSON.stringify(twinContext.live_state?.crowd_density || {})}.
+Gate statuses: ${JSON.stringify(twinContext.gates)}.
 Respond concisely in ${lang}. Always return a JSON object: { "directions": string, "targetId": string, "tip": string }.`;
 
   try {
