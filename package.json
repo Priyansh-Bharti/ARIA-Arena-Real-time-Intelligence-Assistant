@@ -28,8 +28,8 @@
     "prettier": "^3.2.4"
   },
   "jest": {
-    "setupFilesAfterFramework": ["./tests/setup.js"],
+    "setupFiles": ["./tests/setup.js"],
     "testEnvironment": "node",
-    "testMatch": ["**/tests/**/*.test.js"]
+    "testMatch": ["**/tests/**/*.test.js", "**/tests/**/languageTests.js"]
   }
 }
