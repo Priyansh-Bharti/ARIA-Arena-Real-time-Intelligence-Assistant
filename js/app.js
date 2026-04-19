@@ -6,7 +6,7 @@
 
 import { askAria } from './gemini.js?v=4';
 import { initFirebase, trackEvent } from './firebase.js?v=4';
-import { initArenaMap, routeToDestination, drawAnimatedRoute } from './maps.js?v=4';
+import { initArenaMap, routeToDestination, drawAnimatedRoute, toggleMapType } from './maps.js?v=4';
 import { requestNotificationPermission, handleVenueAlertTriggers } from './notifications.js?v=4';
 import { i18n } from './i18n.js?v=4';
 import { sanitize, debug } from './utils.js?v=4';
@@ -223,10 +223,8 @@ function bindEvents() {
     
     // Toggle Map Type (Roadmap <-> Satellite)
     if (id === 'btn-toggle-view') {
-      import('./maps.js').then(m => {
-        const isSatellite = m.toggleMapType();
-        e.target.textContent = isSatellite ? 'ROADMAP' : 'SATELLITE';
-      });
+      const isSatellite = toggleMapType();
+      e.target.textContent = isSatellite ? 'ROADMAP' : 'SATELLITE';
     }
 
     if (id === 'aria-send-btn') {
