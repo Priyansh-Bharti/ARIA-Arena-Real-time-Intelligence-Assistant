@@ -13,6 +13,8 @@ const cors = require('cors');
 // Modular Route Imports
 const analyticsRouter = require('./routes/analytics');
 const venueRouter = require('./routes/venue');
+const wayfindingRouter = require('./routes/wayfinding');
+const { startEventLogger } = require('./eventLogger');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -53,6 +55,7 @@ app.use(express.static(__dirname));
 // ─── Modular API Routes ────────────────────────────────────────────────────────
 app.use('/api', analyticsRouter);
 app.use('/api/venue', venueRouter);
+app.use('/api/wayfinding', wayfindingRouter);
 
 // ─── SPA Fallback (PWA Routing) ───────────────────────────────────────────────
 app.get('*', (req, res) => {
@@ -63,6 +66,8 @@ app.get('*', (req, res) => {
 if (require.main === module) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[ARIA Enterprise] Server listening on port ${PORT}`);
+    // Start background services
+    startEventLogger(require('firebase/app').getApp());
   });
 }
 

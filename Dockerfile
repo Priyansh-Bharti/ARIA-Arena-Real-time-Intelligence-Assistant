@@ -10,7 +10,10 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install production dependencies.
-RUN npm install --only=production
+RUN npm install
+
+# Prune devDependencies after install to minimize production image size
+RUN npm prune --omit=dev
 
 # Copy local code to the container image.
 COPY . .
