@@ -227,7 +227,14 @@ function bindEvents() {
       }
     }
 
+    // AI Concierge Floating Button (Guard & Focus)
     if (id === 'concierge-trigger') {
+      if (!State.userSeat.section) {
+        document.getElementById('input-section')?.focus();
+        document.getElementById('input-section').style.borderColor = 'var(--color-error)';
+        return;
+      }
+
       if (State.currentScreen !== CONFIG.SCREENS.ASSISTANT) {
         navigateTo(CONFIG.SCREENS.ASSISTANT);
       }
@@ -296,6 +303,13 @@ function showLoading(isLoading) {
 
 function render() {
   const templateFn = TEMPLATES[State.currentScreen];
+  const trigger = document.getElementById('concierge-trigger');
+  
+  // Hide the AI button on the landing screen to prevent empty-location requests
+  if (trigger) {
+    trigger.style.display = (State.currentScreen === CONFIG.SCREENS.WELCOME) ? 'none' : 'flex';
+  }
+
   if (templateFn) {
     document.getElementById('screen-outlet').innerHTML = templateFn();
     if (State.currentScreen === CONFIG.SCREENS.ASSISTANT) initArenaMap('mini-map', true);
