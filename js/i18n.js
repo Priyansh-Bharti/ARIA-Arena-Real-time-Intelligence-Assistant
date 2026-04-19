@@ -1,7 +1,7 @@
 /**
  * ARIA — Internationalization Module
  * Manages runtime locale switching and string translations.
- * Supports: English (en), Hindi (hi), Spanish (es), French (fr).
+ * Supports: English (en), Hindi (hi), Spanish (es), French (fr), Arabic (ar), Chinese (zh).
  * @module i18n
  */
 
@@ -92,6 +92,40 @@ export const i18n = {
       offline_title: "Êtes-vous toujours dans les gradins ?",
       offline_body: "Nous avons perdu la connexion avec le flux d'intelligence.",
       retry: "RÉESSAYER LA CONNEXION"
+    },
+    ar: {
+      welcome_title: "مرحباً بك في الساحة",
+      welcome_subtitle: "سجّل موقعك للحصول على معلومات شخصية.",
+      section: "القسم", row: "الصف", seat: "المقعد",
+      enter_arena: "ادخل الساحة",
+      aria_welcome_text: "مرحباً! كيف يمكنني مساعدتك اليوم؟",
+      assistant_title: "قسم", location_label: "موقعك",
+      pro_tip_label: "نصيحة احترافية", aria_intelligence: "ذكاء ARIA",
+      view_map: "عرض الخريطة الكاملة", view_route: "عرض المسار على الخريطة",
+      dismiss: "تجاهل", back: "رجوع",
+      food_drinks: "طعام وشراب", restrooms: "دورات المياه",
+      exit_route: "مسار الخروج", emergency: "طوارئ",
+      wayfinding: "الإرشاد",
+      offline_title: "هل لا تزال في المدرجات؟",
+      offline_body: "فقدنا الاتصال بتغذية الذكاء الاصطناعي.",
+      retry: "إعادة الاتصال"
+    },
+    zh: {
+      welcome_title: "欢迎来到球场",
+      welcome_subtitle: "注册您的位置以获取个性化信息。",
+      section: "区域", row: "排", seat: "座位",
+      enter_arena: "进入球场",
+      aria_welcome_text: "欢迎！我今天能帮您什么？",
+      assistant_title: "区", location_label: "您的位置",
+      pro_tip_label: "专业提示", aria_intelligence: "ARIA 智能",
+      view_map: "查看完整地图", view_route: "在地图上查看路线",
+      dismiss: "忽略", back: "返回",
+      food_drinks: "餐饮", restrooms: "洗手间",
+      exit_route: "出口路线", emergency: "紧急情况",
+      wayfinding: "导航",
+      offline_title: "您还在看台上吗？",
+      offline_body: "我们已断开与球场智能系统的连接。",
+      retry: "重新连接"
     }
   },
 
