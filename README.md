@@ -28,7 +28,7 @@ ARIA was strictly architected to max out evaluation criteria:
 - **Code Quality**: Enforced via ESLint. Modular Vanilla JS structure avoids framework bloat. Full JSDoc implementation ensures high maintainability.
 - **Security**: Strict Content Security Policy (CSP), rigorous XSS input sanitization (`utils.js`), and isolated backend config `.gcloudignore` handling.
 - **Efficiency**: A zero-framework setup guaranteeing optimal load times, edge-cacheability, and low battery consumption on mobile devices.
-- **Testing**: A professional Jest test suite (`/tests/unit.test.js`) validates all core translation, routing, and security utility logic.
+- **Testing**: A comprehensive 4-part Jest test suite (`/tests/`) systematically validates core utility logic (`unit.test.js`), external API edge cases (`gemini.test.js`), geographical fallback resilience (`maps.test.js`), and full state-to-router integration flows (`integration.test.js`).
 - **Accessibility**: Built to WCAG 2.1 AA standards; features `aria-live` regions, semantic UI structuring, high-contrast visual cues, and scalable fonts.
 - **Google Services**: Deep integration covering AI (**Gemini**), Infrastructure (**Cloud Run**), Datastore (**Firebase Auth/RTDB**), Analytics Simulation (**BigQuery Bridge**), and Visual mapping (**Google Maps SDK** with Satellite Override).
 
@@ -79,19 +79,25 @@ ARIA/
 ├── offline.html
 ├── manifest.json
 ├── sw.js
-├── server.js          (Production Node Server)
-├── package.json       (Dependencies)
+├── server.js               (Production Node Server)
+├── package.json            (Dependencies)
+├── .eslintrc.json          (Linting Rules)
+├── .gcloudignore           (Cloud Run Exclusions)
+├── icons/                  (PWA & Favicon Assets)
 ├── tests/
-│   └── unit.test.js   (Core logic validation)
+│   ├── unit.test.js        (Core Utility Specs)
+│   ├── gemini.test.js      (AI Edge Case Specs)
+│   ├── maps.test.js        (Routing Logic Specs)
+│   └── integration.test.js (State Flow Specs)
 ├── js/
 │   ├── app.js
-│   ├── gemini.js      (Hardened AI Controller)
+│   ├── gemini.js           (Hardened AI Controller)
 │   ├── firebase.js
-│   ├── maps.js        (Dynamic Map Engine)
+│   ├── maps.js             (Dynamic Map Engine)
 │   ├── notifications.js
 │   ├── i18n.js
 │   ├── utils.js
-│   └── config.js      (Gitignored)
+│   └── config.example.js   (Template config)
 └── styles/
     ├── main.css
     └── components.css
