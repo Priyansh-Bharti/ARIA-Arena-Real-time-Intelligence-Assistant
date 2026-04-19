@@ -1,104 +1,231 @@
-# ARIA — Arena Real-time Intelligence Assistant 🏟️✨
+<p align="center">
+  <img src="https://img.shields.io/badge/ARIA-Stadium%20Assistant-blueviolet?style=for-the-badge&logo=googlecloud&logoColor=white" />
+  <img src="https://img.shields.io/badge/Gemini-2.5%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white" />
+  <img src="https://img.shields.io/badge/Firebase-Realtime%20DB-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" />
+  <img src="https://img.shields.io/badge/Google%20Maps-Spatial%20AI-34A853?style=for-the-badge&logo=googlemaps&logoColor=white" />
+  <img src="https://img.shields.io/badge/Cloud%20Run-Deployed-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white" />
+</p>
 
-**ARIA** is a premium, PWA-ready stadium concierge designed to transform the live sports experience. Powered by the **Gemini 2.5 Flash** engine and Google Maps Spatial Intelligence, ARIA provides real-time crowd insights, interactive wayfinding, and proactive fan assistance.
+<h1 align="center">🏟️ ARIA — Arena Real-time Intelligence Assistant</h1>
+
+<p align="center">
+  <strong>AI-powered stadium concierge providing real-time crowd intelligence, spatial wayfinding, and proactive fan assistance.</strong>
+</p>
+
+<p align="center">
+  <i>Built for the Hack2Skill PromptWars Competition · Deployed on Google Cloud Run · April 2026</i>
+</p>
+
+---
+
+## 📋 Table of Contents
+
+- [Chosen Vertical](#-chosen-vertical)
+- [Approach and Logic](#-approach-and-logic)
+- [How the Solution Works](#-how-the-solution-works)
+- [Assumptions Made](#-assumptions-made)
+- [Key Features](#-key-features)
+- [Architecture](#-architecture)
+- [Tech Stack](#-tech-stack)
+- [API Endpoints](#-api-endpoints)
+- [Evaluation Focus Areas](#-evaluation-focus-areas)
+- [Setup & Installation](#-setup--installation)
+- [Project Structure](#-project-structure)
+
+---
 
 ## 🎯 Chosen Vertical
-**Sports & Entertainment (Venue Concierge)**  
-ARIA addresses the massive logistical challenges of megavenues, where fans frequently get lost seeking their seats, restrooms, or food concessions, often missing critical moments of the event.
+
+**Sports & Entertainment (Fan Venue Concierge)**
+
+ARIA addresses the critical logistical challenges of megavenues — where 50,000+ fans simultaneously struggle to find their seats, nearest concessions, restrooms, or emergency exits, often missing critical moments of the event they paid for.
+
+---
 
 ## 🧠 Approach and Logic
-We approached this problem by decoupling the "AI brain" from the "spatial routing". 
-1. **AI Brain (Gemini 2.5 Flash)**: Acts as the conversational interface, converting human queries ("Where is the nearest food?") into intent objects and extracting the exact coordinates mapped to our venue blueprint.
-2. **Real-time State (Firebase)**: Acts as the nervous system, pulsing the current game phase and crowd density across the venue's zones to the client.
-3. **Spatial Navigation (Google Maps)**: Acts as the visual layer, mapping out the route in high-contrast dark mode with explicit step-by-step directions.
+
+We architected ARIA around a three-layer intelligence pipeline:
+
+1. **AI Brain (Gemini 2.5 Flash)** — acts as an intent parser, not just a chatbot. Converts natural language ("I'm hungry") into structured JSON output containing coordinates, route targets, and contextual tips.
+2. **Real-time Nervous System (Firebase RTDB)** — streams live venue state (crowd density, game phase, gate status) to every connected fan simultaneously without polling.
+3. **Spatial Navigation Layer (Google Maps JS API)** — consumes Gemini's route output and renders animated, real-time polylines across the stadium, with a Satellite toggle for spatial clarity.
+
+---
 
 ## ⚙️ How the Solution Works
-1. **Onboarding**: Fans scan a QR code at their seat, instantly logging them into their specific section via the responsive PWA.
-2. **Context-Aware Chat**: When a user queries ARIA, the system bundles their exact seat location and the active stadium state (e.g., "Gate 1 is currently congested") into the Gemini prompt.
-3. **Idempotent Delivery**: Gemini returns structured JSON containing text directions, a route `targetId`, and a localized tip.
-4. **Wayfinding**: The `maps.js` engine dynamically draws an animated polyline across the Google Maps instance directly to the parsed `targetId`.
+
+1. **Onboarding** — A fan enters their section/row. ARIA registers their spatial position within the venue grid.
+2. **Context-Aware Query** — The AI receives the user's message bundled with their seat location + live stadium state (e.g., "Gate 1 is currently High density").
+3. **Structured Response** — Gemini returns strict JSON: `{ directions, targetId, tip }`.
+4. **Wayfinding** — `maps.js` parses `targetId`, resolves the coordinate from `VENUE_ZONES`, and animates a blue polyline route directly on the Google Map.
+5. **Satellite Toggle** — Users can switch from dark-mode roadmap to photorealistic satellite imagery for spatial orientation.
+
+---
 
 ## 📌 Assumptions Made
-- The venue possesses a mapped coordinate array (`VENUE_ZONES`) that can route custom indoor/outdoor pathways via Google Maps Polyline.
-- Users have an active mobile data or venue Wi-Fi connection (though the PWA caches static assets for offline resilience).
-- Real-time IoT sensors (or manual event operators) are simulated via Firebase RTDB to update the `crowd_density` object.
 
-## 🏆 Evaluation Focus Areas
-ARIA was strictly architected to max out evaluation criteria:
-- **Code Quality**: Enforced via ESLint. Modular Vanilla JS structure avoids framework bloat. Full JSDoc implementation ensures high maintainability.
-- **Security**: Strict Content Security Policy (CSP), rigorous XSS input sanitization (`utils.js`), and isolated backend config `.gcloudignore` handling.
-- **Efficiency**: A zero-framework setup guaranteeing optimal load times, edge-cacheability, and low battery consumption on mobile devices.
-- **Testing**: A comprehensive 4-part Jest test suite (`/tests/`) systematically validates core utility logic (`unit.test.js`), external API edge cases (`gemini.test.js`), geographical fallback resilience (`maps.test.js`), and full state-to-router integration flows (`integration.test.js`).
-- **Accessibility**: Built to WCAG 2.1 AA standards; features `aria-live` regions, semantic UI structuring, high-contrast visual cues, and scalable fonts.
-- **Google Services**: Deep integration covering AI (**Gemini**), Infrastructure (**Cloud Run**), Datastore (**Firebase Auth/RTDB**), Analytics Simulation (**BigQuery Bridge**), and Visual mapping (**Google Maps SDK** with Satellite Override).
+- `VENUE_ZONES` in `js/maps.js` represents a mapped coordinate array for a real-world venue (Wembley Stadium, London).
+- Fan devices have mobile data or venue Wi-Fi (PWA caches static assets offline).
+- Firebase RTDB `crowd_density` values are updated by venue operators or simulated IoT sensors.
+- The BigQuery analytics pipeline logs routing events; a live dataset would be attached in a full production rollout.
+
+---
 
 ## 🚀 Key Features
-- **Next-Gen AI Brain** — Context-aware responses via **Gemini 2.5 Flash** with structured JSON output.
-- **Real-time Telemetry** — Firebase RTDB listeners for live crowd density and game phase.
-- **Spatial Wayfinding** — Interactive 3D maps with custom venue markers, animated route polylines, and Satellite toggling.
-- **Idempotent Alerts** — Smart notification engine that prevents spam while ensuring fans never miss a beat.
-- **Multilingual Support** — Runtime language switching (EN, HI, ES, FR).
-- **Offline-First PWA** — Service Worker with full asset caching and offline splash page.
-- **Production Hardened** — WCAG 2.1 AA, strict CSP, XSS escaping, and rate-limiting.
+
+| Feature | Description |
+|---|---|
+| **Gemini 2.5 Flash AI** | Context-aware, structured JSON responses with seat-location awareness |
+| **Real-time Telemetry** | Firebase RTDB live crowd density and game phase broadcast |
+| **Spatial Wayfinding** | Animated Google Maps polyline routing with custom venue markers |
+| **Satellite Toggle** | Switch between dark roadmap and photorealistic satellite imagery |
+| **Multilingual Support** | Runtime i18n switching across EN, HI, ES, FR |
+| **PWA Offline Mode** | Service Worker v5 caching all static assets |
+| **BigQuery Analytics** | Venue telemetry streaming to GCP Data Warehouse |
+| **WCAG 2.1 AA** | Full accessibility compliance with `aria-live` regions and semantic HTML |
+
+---
+
+## 🏛️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                  ARIA PWA (Vanilla JS, ES Modules)          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌───────────┐   │
+│  │ app.js   │  │ gemini.js│  │ maps.js  │  │firebase.js│   │
+│  │ (Router) │  │ (AI Core)│  │ (Spatial)│  │ (RTDB)    │   │
+│  └──────────┘  └──────────┘  └──────────┘  └───────────┘   │
+└────────────────────────┬────────────────────────────────────┘
+                         │ HTTP
+┌────────────────────────┴────────────────────────────────────┐
+│              Node.js + Express Production Server            │
+│  ┌──────────────────┐  ┌───────────────────────────────┐   │
+│  │ routes/venue.js  │  │ routes/analytics.js (BigQuery)│   │
+│  └──────────────────┘  └───────────────────────────────┘   │
+│  helmet · cors · express-rate-limit · firebase-admin        │
+└────────────────────────┬────────────────────────────────────┘
+                         │
+┌────────────────────────┴────────────────────────────────────┐
+│              Google Cloud Infrastructure                     │
+│  Cloud Run · BigQuery · Firebase Auth/RTDB · Maps API       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
 
 ## 🛠️ Tech Stack
-| Layer | Technology |
-|-------|-----------|
-| Frontend | HTML5, CSS3, Vanilla JS (ES Modules) |
-| AI | Gemini 2.5 Flash |
-| Data | Firebase Auth, Realtime Database, Analytics |
-| Enterprise | Google Cloud Run, GCP BigQuery (Analytics Bridge) |
-| Maps | Google Maps JavaScript API |
-| Testing | Jest, ESLint |
-| Hosting | Google Cloud Run / Firebase |
 
-## ⚙️ Setup
-1. Clone the repository
-2. Copy `js/config.example.js` → `js/config.js`
-3. Add your API keys to `js/config.js`
-4. Serve via `node server.js`
-5. Debug mode: append `?debug=true` to URL
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Frontend** | HTML5, CSS3, Vanilla JS (ES Modules) | Zero-framework, max efficiency PWA |
+| **AI** | Gemini 2.5 Flash | Structured intent parsing and concierge responses |
+| **Mapping** | Google Maps JavaScript API | Spatial routing, polylines, satellite toggle |
+| **Database** | Firebase Auth + Realtime Database | Live crowd state and user session management |
+| **Analytics** | Google Cloud BigQuery | Venue telemetry and crowd movement forecasting |
+| **Backend** | Node.js + Express | Modular REST API with security middleware |
+| **Security** | Helmet, CORS Whitelist, express-rate-limit | Enterprise-grade HTTP hardening |
+| **Hosting** | Google Cloud Run | Auto-scaling containerized deployment |
+| **Testing** | Jest + supertest | Unit, integration, and edge case validation |
+| **Quality** | ESLint, Prettier, JSDoc | Enforced code standards and documentation |
 
-## 📊 Firebase RTDB Schema
-```json
-{
-  "venue": {
-    "game_phase": "Live | Halftime | Post-Game",
-    "crowd_density": {
-      "gate_1": "Low | Medium | High",
-      "gate_2": "Low | Medium | High"
-    }
-  }
-}
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Cloud Run uptime health check |
+| `GET` | `/api/venue/zones` | Returns all venue zones with IDs and types |
+| `GET` | `/api/venue/status` | Returns live game phase and crowd density |
+| `POST` | `/api/analytics` | Logs a named event to Google Cloud BigQuery |
+
+---
+
+## 🏆 Evaluation Focus Areas
+
+| Criterion | Implementation |
+|---|---|
+| **Code Quality** | ESLint-enforced, modular route architecture (`routes/`), full JSDoc documentation across all modules |
+| **Security** | Strict Helmet CSP, CORS origin whitelist, DDoS rate-limiting, XSS input sanitization in `utils.js`, `.gcloudignore` secret isolation |
+| **Efficiency** | Zero-framework Vanilla JS, Service Worker v5 caching, JSON body limits, Cloud Run auto-scaling |
+| **Testing** | 5-file test suite: unit, AI edge cases, maps fallback, state integration flows, and live HTTP API tests via supertest |
+| **Accessibility** | WCAG 2.1 AA, `aria-live` polite regions, semantic HTML5, `role` attributes, high-contrast dark theme, keyboard navigable |
+| **Google Services** | Gemini 2.5 Flash, Google Maps API + Satellite, Firebase Auth/RTDB, Google Cloud Run, Cloud BigQuery analytics bridge |
+
+---
+
+## ⚙️ Setup & Installation
+
+### Prerequisites
+- Node.js v18+
+- A [Google AI Studio](https://aistudio.google.com/app/apikey) API key (Gemini)
+- A [Firebase](https://console.firebase.google.com/) project (Spark Free Plan)
+- A [Google Maps](https://console.cloud.google.com/apis/library/maps-javascript-backend.googleapis.com) JavaScript API key
+
+### Installation
+```bash
+# 1. Clone the repository
+git clone https://github.com/Priyansh-Bharti/ARIA---Arena-Real-time-Intelligence-Assistant.git
+cd ARIA---Arena-Real-time-Intelligence-Assistant
+
+# 2. Install all dependencies
+npm install
+
+# 3. Create configuration
+cp js/config.example.js js/config.js
+# Edit js/config.js with your actual API keys
+
+# 4. Start the server
+npm start
+
+# 5. Run the full test suite
+npm test
 ```
+
+### Debug Mode
+Append `?debug=true` to the URL for verbose console logging.
+
+---
 
 ## 📁 Project Structure
+
 ```
 ARIA/
-├── index.html
-├── offline.html
-├── manifest.json
-├── sw.js
-├── server.js               (Production Node Server)
-├── package.json            (Dependencies)
-├── .eslintrc.json          (Linting Rules)
-├── .gcloudignore           (Cloud Run Exclusions)
-├── icons/                  (PWA & Favicon Assets)
+├── index.html                  (PWA Entry Point)
+├── offline.html                (Service Worker offline fallback)
+├── manifest.json               (PWA manifest)
+├── sw.js                       (Service Worker v5 — asset caching)
+├── server.js                   (Modular production Express server)
+├── package.json                (Dependencies + npm scripts)
+├── Dockerfile                  (Cloud Run container definition)
+├── .eslintrc.json              (ESLint code quality rules)
+├── .gcloudignore               (Cloud Run build exclusions)
+├── routes/
+│   ├── analytics.js            (BigQuery event logging API)
+│   └── venue.js                (Venue zones and status API)
 ├── tests/
-│   ├── unit.test.js        (Core Utility Specs)
-│   ├── gemini.test.js      (AI Edge Case Specs)
-│   ├── maps.test.js        (Routing Logic Specs)
-│   └── integration.test.js (State Flow Specs)
+│   ├── unit.test.js            (Core utility and i18n specs)
+│   ├── gemini.test.js          (AI edge case and rate limit specs)
+│   ├── maps.test.js            (Routing fallback and toggle specs)
+│   ├── integration.test.js     (State-to-router flow specs)
+│   └── api.test.js             (Live HTTP endpoint specs via supertest)
 ├── js/
-│   ├── app.js
-│   ├── gemini.js           (Hardened AI Controller)
-│   ├── firebase.js
-│   ├── maps.js             (Dynamic Map Engine)
-│   ├── notifications.js
-│   ├── i18n.js
-│   ├── utils.js
-│   └── config.example.js   (Template config)
-└── styles/
-    ├── main.css
-    └── components.css
+│   ├── app.js                  (Main controller and screen router)
+│   ├── gemini.js               (Hardened AI request controller)
+│   ├── firebase.js             (Firebase Auth + RTDB client)
+│   ├── maps.js                 (Google Maps engine + satellite toggle)
+│   ├── notifications.js        (Idempotent push alert engine)
+│   ├── i18n.js                 (Runtime multilingual engine)
+│   ├── utils.js                (XSS sanitizer, debug logger, helpers)
+│   └── config.example.js       (API key template — safe to commit)
+├── styles/
+│   ├── main.css                (Design system tokens and layout)
+│   └── components.css          (UI component styles)
+└── icons/                      (PWA icons and favicon assets)
 ```
+
+---
+
+<p align="center">
+  Built with ❤️ for the <strong>Hack2Skill PromptWars Competition</strong> by <a href="https://github.com/Priyansh-Bharti">Priyansh Bharti</a>
+</p>

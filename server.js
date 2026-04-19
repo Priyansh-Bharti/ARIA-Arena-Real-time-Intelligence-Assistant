@@ -1,45 +1,69 @@
+/**
+ * ARIA — Production Express Server
+ * Modular, security-hardened, and enterprise-ready backend for the ARIA Stadium PWA.
+ * Integrates Google Cloud services including BigQuery analytics and Firebase Admin.
+ */
+
 const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { BigQuery } = require('@google-cloud/bigquery');
-const admin = require('firebase-admin');
+const cors = require('cors');
+
+// Modular Route Imports
+const analyticsRouter = require('./routes/analytics');
+const venueRouter = require('./routes/venue');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Security: Helmet sets robust HTTP headers to block injection attacks
+// ─── Security: Helmet (HTTP Headers) ──────────────────────────────────────────
 app.use(helmet({
-  contentSecurityPolicy: false // Defer to our custom meta CSP in index.html
+  contentSecurityPolicy: false // Custom CSP enforced via meta tag in index.html
 }));
 
-// Security: Rate Limiting to prevent DDoS
+// ─── Security: CORS Whitelist ──────────────────────────────────────────────────
+const allowedOrigins = [
+  'http://localhost:8080',
+  'https://aria-stadium-pro-93244820981.us-central1.run.app'
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS Policy Violation: Unauthorized origin blocked.'));
+    }
+  }
+}));
+
+// ─── Security: Rate Limiting (DDoS Protection) ────────────────────────────────
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per window
+  max: 100
 });
 app.use(limiter);
 
-// Serve static assets
+// ─── Body Parsing ──────────────────────────────────────────────────────────────
+app.use(express.json({ limit: '1mb' }));
+
+// ─── Static Assets ─────────────────────────────────────────────────────────────
 app.use(express.static(__dirname));
 
-// Google Cloud Services: BigQuery Integration
-const bigquery = new BigQuery();
-const streamToBigQuery = async (event) => {
-  try {
-    console.log(`[Google Cloud BigQuery] Dataset ARIA_Live_Pulse: ${event} successfully logged at ${new Date().toISOString()}`);
-    // Awaiting specific dataset linkage for full pipe
-  } catch (err) {
-    console.error('BigQuery Stream Failed:', err);
-  }
-};
+// ─── Modular API Routes ────────────────────────────────────────────────────────
+app.use('/api', analyticsRouter);
+app.use('/api/venue', venueRouter);
 
-// Fallback to index.html for PWA routing
+// ─── SPA Fallback (PWA Routing) ───────────────────────────────────────────────
 app.get('*', (req, res) => {
-  if (req.url === '/') streamToBigQuery('USER_SESSION_START');
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`[ARIA Enterprise Edge] Server listening on port ${PORT}`);
-});
+// ─── Server Launch ─────────────────────────────────────────────────────────────
+if (require.main === module) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[ARIA Enterprise] Server listening on port ${PORT}`);
+  });
+}
+
+module.exports = app; // Export for supertest integration testing
