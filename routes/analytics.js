@@ -1,8 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const { BigQuery } = require('@google-cloud/bigquery');
-
-const bigquery = new BigQuery();
 
 /**
  * POST /api/analytics
@@ -16,6 +13,8 @@ router.post('/analytics', async (req, res) => {
   }
 
   try {
+    const { BigQuery } = require('@google-cloud/bigquery');
+    const bigquery = new BigQuery();
     // In production: await bigquery.dataset('ARIA_Live').table('events').insert([{ event, timestamp: new Date() }]);
     console.log(`[Google Cloud BigQuery] ARIA_Live_Pulse: "${event}" logged at ${new Date().toISOString()}`);
     res.json({ success: true, event, logged_at: new Date().toISOString() });
